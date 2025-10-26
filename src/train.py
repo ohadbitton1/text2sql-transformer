@@ -1,4 +1,8 @@
+import torch
 import argparse
+import torch.optim as optim
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, get_linear_schedule_with_warmup
+from src.data_processing import get_dataloaders
 
 def main():
     
@@ -10,22 +14,48 @@ def main():
     
     args = parser.parse_args()
     print("Arguments parsed successfully.")
-
-    
-
-    
-    # TODO: Load the tokenizer from the Hugging Face library based on args.model_name
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     print(f"Placeholder for loading tokenizer for model: {args.model_name}")
-
-
-    # TODO: Load the model from the Hugging Face library based on args.model_name
+    model = AutoModelForSeq2SeqLM.from_pretrained(args.model_name)
     print("Placeholder for loading pre-trained model.")
 
-    # TODO: Call the data processing function from data_processing.py to get dataloaders
+    max_token_length = tokenizer.model_max_length
+
+    train_dataloader, val_dataloader = get_dataloaders('../data/train.csv','../data/validation.csv', args.batch_size ,tokenizer, max_token_length )
     print("Placeholder for creating DataLoaders.")
     
-
+    total_training_steps = len(train_dataloader) * args.num_epochs
+    optimizer = optim.AdamW(model.parameters(), lr= args.learning_rate)
+    warmup_steps =int( total_training_steps * 0.07)
+    scheduler = get_linear_schedule_with_warmup(optimizer,warmup_steps,total_training_steps )
     print("\nModel and data loaded successfully. Ready for training.")
+
+
+    #EPOCH LOOP
+
+    for epoch in range(args.num_epochs):
+        model.train()
+        total_val_loss= 0
+        for i, batch in enumerate(train_dataloader):
+            outputs= model(**batch)
+            loss = outputs.loss
+            loss.backward()
+            optimizer.step()
+            scheduler.step()
+            optimizer.zero_grad()
+            if (i + 1) % 50 == 0:
+                print(f"Epoch {epoch+1}, Step {i+1}, Train Loss: {loss.item()}")
+        model.eval()
+        with torch.no_grad():
+            for batch in val_dataloader:
+                outputs = model(**batch)
+                loss = outputs.loss
+                total_val_loss += loss.item()
+
+        avg_val_loss = total_val_loss/len(val_dataloader)
+        print(f"Epoch {epoch+1}/{args.num_epochs}, Validation Loss:{avg_val_loss}")
+
+
 
 if __name__ == "__main__":
     main()
