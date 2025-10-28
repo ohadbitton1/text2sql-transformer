@@ -30,7 +30,7 @@ def main():
    
     print("creating DataLoaders.")
     max_token_length = tokenizer.model_max_length
-    train_dataloader, val_dataloader = get_dataloaders('data/train.csv','data/validation.csv', args.batch_size ,tokenizer, max_token_length )
+    train_dataloader, val_dataloader, _ = get_dataloaders('data/train.csv','data/validation.csv', 'data/test.csv', args.batch_size ,tokenizer, max_token_length )
     
     
     total_training_steps = len(train_dataloader) * args.num_epochs
