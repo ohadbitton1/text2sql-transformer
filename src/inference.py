@@ -10,7 +10,7 @@ if __name__ == "__main__":
     model = AutoModelForSeq2SeqLM.from_pretrained("t5-small")
 
     print("loading weigths from state dict")
-    trained_file = torch.load('checkpoints/model_epoch_1.pth', map_location=torch.device('cpu'))
+    trained_file = torch.load('checkpoints/model_epoch_3.pth', map_location=torch.device('cpu'))
     model.load_state_dict(trained_file)
 
     model.eval()
