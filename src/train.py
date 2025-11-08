@@ -3,7 +3,9 @@ import os
 import argparse
 import torch.optim as optim
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, get_linear_schedule_with_warmup
-from src.data_processing import get_dataloaders
+#לקאגל לא צריך src.
+from data_processing import get_dataloaders
+
 from torch.utils.tensorboard import SummaryWriter
 
 def main():
@@ -15,6 +17,10 @@ def main():
     parser.add_argument("--num_epochs", type=int, default=3, help="Total number of training epochs.")
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size for training and evaluation.")
     parser.add_argument("--model_name", type=str, default="t5-small", help="The name of the pretrained model to use.")
+    #בעיקר לשימוש בקאגל
+    parser.add_argument("--train_path", type=str, default="data/train.csv", help="Path to the training data.")
+    parser.add_argument("--val_path", type=str, default="data/validation.csv", help="Path to the validation data.")
+    parser.add_argument("--test_path", type=str, default="data/test.csv", help="Path to the test data.")
 
     args = parser.parse_args()
     print("Arguments parsed successfully.")
@@ -30,8 +36,15 @@ def main():
    
     print("creating DataLoaders.")
     max_token_length = tokenizer.model_max_length
-    train_dataloader, val_dataloader, _ = get_dataloaders('data/train.csv','data/validation.csv', 'data/test.csv', args.batch_size ,tokenizer, max_token_length )
-    
+    train_dataloader, val_dataloader, _ = get_dataloaders(
+    args.train_path, 
+    args.val_path, 
+    args.test_path, 
+    args.batch_size, 
+    tokenizer, 
+    max_token_length
+    )
+
     
     total_training_steps = len(train_dataloader) * args.num_epochs
     optimizer = optim.AdamW(model.parameters(), lr= args.learning_rate)

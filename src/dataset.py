@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import Dataset
 import ast
 import re 
+
 # בקובץ data_processing.py (או למעלה ב-dataset.py)***נכתב ע"י gemini***
 
 
@@ -49,9 +50,11 @@ class SQLDataset (Dataset):
         return len(self.dataset)
     
     def __getitem__(self, index):
+        #לקאגל לא צריך src.
+        from data_processing import clean_non_alph
         question = self.dataset['question'][index].lower() 
-        query = self.dataset['sql'][index].lower()
-        schema_string = self.dataset['schema_input'][index]
+        query = clean_non_alph( self.dataset['sql'][index].lower())
+        schema_string = clean_non_alph(self.dataset['schema_input'][index])
         T5_prefix = "translate English to SQL: "
         full_request = f"{T5_prefix}{schema_string} | {question}"
         source_incoding = self.tokenizer(full_request, max_length= self.max_length, truncation=True, padding= 'max_length', return_tensors='pt')
