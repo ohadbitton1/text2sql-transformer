@@ -13,9 +13,13 @@ if __name__ == "__main__":
     print("loading model")
     model = AutoModelForSeq2SeqLM.from_pretrained("t5-small")
 
+    model_path = 'checkpoints\model_epoch_3.pth'
+
+    """
     # שינוי 1: נתיב מלא למודל החדש שאימנו בקאגל
     model_path = '/kaggle/working/model_checkpoints/model_epoch_3.pth'
     # =================================================================
+    """
 
     print("loading weigths from state dict")
     trained_file = torch.load(model_path, map_location=torch.device('cpu'))
